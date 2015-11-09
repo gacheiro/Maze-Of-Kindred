@@ -17,3 +17,4 @@ Please download [Maze of Kindred Windows executable](https://dl.dropboxuserconte
 
 ![Maze of Kindred](https://cloud.githubusercontent.com/assets/11036045/11017973/dee467ae-8591-11e5-9e4e-f6609100721c.png)
 ![Maze of Kindred](https://cloud.githubusercontent.com/assets/11036045/11017974/deea1f8c-8591-11e5-850b-3d6842749b48.png)
+![Maze of Kindred](https://cloud.githubusercontent.com/assets/11036045/11048498/ff641de0-8716-11e5-9f21-2344557d9e7e.png)
