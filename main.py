@@ -4,6 +4,7 @@ from player import player
 from timer import timer
 from animation import animation
 from random import shuffle
+from light import light
 import common
 
 class maze_of_kindred ():
@@ -25,6 +26,7 @@ class maze_of_kindred ():
 		self.b_rect = None
 		
 		self.torches = []
+		self.lights = []
 		
 	def load (self):
 		
@@ -40,10 +42,10 @@ class maze_of_kindred ():
 		self.b_nosound = pygame.image.load('assets/opengameart/nathanLovatoArt/no_sound.png').convert_alpha()
 		self.b_restart = pygame.image.load('assets/opengameart/nathanLovatoArt/restart.png').convert_alpha()
 		
-		# button click point
+		# button sound and restart click rect
 		self.b_rect = self.b_sound.get_rect(topleft=(common.GAME_WIDTH - 80, 10))
 		
-		# torches and flames
+		# torches and flames (sprite animation)
 		torch = pygame.image.load('assets/opengameart/liberated pixel cup/torch.png').convert_alpha()
 		flame = pygame.image.load('assets/opengameart/liberated pixel cup/flames.png').convert_alpha()
 		
@@ -67,6 +69,12 @@ class maze_of_kindred ():
 			(83, 138),
 		]
 		
+		# lights are the vision of the player
+		self.lights.append(light(0, 0))
+		self.lights.append(light(240, 0))
+		self.lights.append(light(384, 0))
+		self.lights.append(light(-13, 58))
+		
 		pygame.mixer.music.load('assets/opengameart/tozan/longbust.ogg')
 		
 	def create (self):
@@ -88,10 +96,17 @@ class maze_of_kindred ():
 		
 		for t in self.torches:
 			t.play(common.TORCH_ANIMATION_TIME, loop=True)
+			
+		for l in self.lights:
+			l.anim.play(common.TORCH_ANIMATION_TIME, loop=True)
+			
+		self.fog = self.maze.surface.copy()
 		
 	def draw (self):
 		
 		surface = self.maze.surface.copy()
+		fog = pygame.Surface((surface.get_width(), surface.get_height()))
+		fog.set_colorkey((255, 0, 255))
 		
 		x = common.GAME_WIDTH * 0.5 - self.player.x * self.tile_size - 16 + self.player.offset_x
 		y = common.GAME_HEIGHT * 0.8 - self.player.y * self.tile_size + self.player.offset_y
@@ -107,15 +122,19 @@ class maze_of_kindred ():
 		player_x = self.player.x * common.TILE_SIZE - self.player.offset_x - 16
 		player_y = self.player.y * common.TILE_SIZE - self.player.offset_y - 32
 		
-		self.screen.fill((0, 0, 0))
 		surface.blit(self.castle, (0, -16))
-		
-		for i in range (0, len(self.torches)):
-			surface.blit(self.torches[i].get_image(), self.torches_pos[i])
-			
 		surface.blit(self.player.get_image(), (player_x, player_y))
 		
+		for i in range (0, len(self.torches)): # torches sprite animations
+			surface.blit(self.torches[i].get_image(), self.torches_pos[i])
+		
+		for l in self.lights: # the vision of the player
+			fog.blit(l.get_image(), (l.x, l.y))
+
 		self.screen.blit(surface, (x, y))
+		
+		if common.ENABLE_FOG:
+			self.screen.blit(fog, (x, y))
 		
 		if not self.fade_timer.is_complete():
 		
@@ -199,8 +218,14 @@ class maze_of_kindred ():
 					
 				self.player.update(time)
 				
+				self.lights[0].x = self.player.x * common.TILE_SIZE - self.player.offset_x - 112 + 16
+				self.lights[0].y = self.player.y * common.TILE_SIZE - self.player.offset_y - 112 + 16
+				
 				for t in self.torches:
 					t.update(time)
+					
+				for l in self.lights:
+					l.anim.update(time)
 					
 				self.draw()
 				
