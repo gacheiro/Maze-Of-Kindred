@@ -14,8 +14,7 @@ class maze_of_kindred ():
 		self.height = height
 		self.tile_size = tile_size
 		
-	#	self.player = player(width/2, height - 2)
-		self.player = player(13, 6)
+		self.player = player(width/2, height - 2)
 		
 		self.enable_graphics = common.ENABLE_GRAPHICS
 		self.enable_sound = common.ENABLE_SOUND
@@ -84,10 +83,11 @@ class maze_of_kindred ():
 		self.player.x = self.width/2
 		self.player.y = self.height - 2
 		
+		# black screen fade out
 		self.fade_timer = timer(2000)
 		
 		for t in self.torches:
-			t.play(common.TORCH_ANIMATION_TIME)
+			t.play(common.TORCH_ANIMATION_TIME, loop=True)
 		
 	def draw (self):
 		
@@ -200,10 +200,7 @@ class maze_of_kindred ():
 				self.player.update(time)
 				
 				for t in self.torches:
-					
 					t.update(time)
-					if t.is_complete():
-						t.play(common.TORCH_ANIMATION_TIME)
 					
 				self.draw()
 				
