@@ -2,6 +2,8 @@ import pygame
 from maze import maze
 from player import player
 from timer import timer
+from animation import animation
+from random import shuffle
 import common
 
 class maze_of_kindred ():
@@ -23,6 +25,8 @@ class maze_of_kindred ():
 		self.fade_timer = None
 		self.b_rect = None
 		
+		self.torches = []
+		
 	def load (self):
 		
 		pygame.display.set_caption('Maze of Kindred')
@@ -39,6 +43,30 @@ class maze_of_kindred ():
 		
 		# button click point
 		self.b_rect = self.b_sound.get_rect(topleft=(common.GAME_WIDTH - 80, 10))
+		
+		# torches and flames
+		torch = pygame.image.load('assets/opengameart/liberated pixel cup/torch.png').convert_alpha()
+		flame = pygame.image.load('assets/opengameart/liberated pixel cup/flames.png').convert_alpha()
+		
+		self.torch_images = []
+		for i in range (0, 9):
+			self.torch_images.append(torch.subsurface(48 * i, 0, 48, 48))
+			
+		self.torches.append(animation(self.torch_images)) # torch 1
+		torch_images_copy = self.torch_images[:] # copy images
+		shuffle(torch_images_copy) 	# then shuffle
+		self.torches.append(animation(torch_images_copy)) # torch 2
+		
+		self.flame_images = []
+		for i in range (0, 12):
+			self.flame_images.append(flame.subsurface(24 * i, 0, 24, 36))
+		self.torches.append(animation(self.flame_images))
+		
+		self.torches_pos = [
+			(336, 80),
+			(480, 80),
+			(83, 138),
+		]
 		
 		pygame.mixer.music.load('assets/opengameart/tozan/longbust.ogg')
 		
@@ -57,6 +85,9 @@ class maze_of_kindred ():
 		self.player.y = self.height - 2
 		
 		self.fade_timer = timer(2000)
+		
+		for t in self.torches:
+			t.play(common.TORCH_ANIMATION_TIME)
 		
 	def draw (self):
 		
@@ -78,6 +109,10 @@ class maze_of_kindred ():
 		
 		self.screen.fill((0, 0, 0))
 		surface.blit(self.castle, (0, -16))
+		
+		for i in range (0, len(self.torches)):
+			surface.blit(self.torches[i].get_image(), self.torches_pos[i])
+			
 		surface.blit(self.player.get_image(), (player_x, player_y))
 		
 		self.screen.blit(surface, (x, y))
@@ -162,7 +197,14 @@ class maze_of_kindred ():
 				if self.maze.matrix[self.player.y + y][self.player.x + x] == 0:
 					self.player.walk(x, y)	
 					
-				self.player.update(time)				
+				self.player.update(time)
+				
+				for t in self.torches:
+					
+					t.update(time)
+					if t.is_complete():
+						t.play(common.TORCH_ANIMATION_TIME)
+					
 				self.draw()
 				
 			#	print self.player.x, self.player.y
