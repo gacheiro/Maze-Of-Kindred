@@ -113,6 +113,8 @@ class maze_of_kindred ():
 			
 			pygame.key.set_repeat(1, 100)
 			
+			x = y = 0
+			
 			while True:
 				
 				time = clock.tick(60)
@@ -141,24 +143,25 @@ class maze_of_kindred ():
 							pygame.mixer.music.set_volume(0)
 							
 					elif event.type == pygame.KEYDOWN and not self.is_at_door():
-					
-						x = y = 0
 						
 						if event.key == pygame.K_LEFT or event.key == pygame.K_a:
-							x -= 1
+							x = -1; y = 0
 							
 						elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-							x += 1
+							x = 1; y = 0
 							
 						elif event.key == pygame.K_UP or event.key == pygame.K_w:
-							y -= 1
+							y = -1; x = 0
 							
 						elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
-							y += 1
-							
-						if self.maze.matrix[self.player.y + y][self.player.x + x] == 0:
-							self.player.walk(x, y)
+							y = 1; x = 0
+					
+					elif event.type == pygame.KEYUP or self.is_at_door():
+						x = y = 0
 				
+				if self.maze.matrix[self.player.y + y][self.player.x + x] == 0:
+					self.player.walk(x, y)	
+					
 				self.player.update(time)				
 				self.draw()
 				
