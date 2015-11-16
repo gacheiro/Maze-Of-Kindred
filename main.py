@@ -2,9 +2,9 @@ import pygame
 from maze import maze
 from player import player
 from timer import timer
-from animation import animation
 from random import shuffle
-from light import light
+from random import randint
+from sprite import sprite
 import common
 
 class maze_of_kindred ():
@@ -23,10 +23,10 @@ class maze_of_kindred ():
 		self.maze = maze(width, height, tile_size)
 		
 		self.fade_timer = None
-		self.b_rect = None
 		
-		self.torches = []
-		self.lights = []
+		self.castle = None
+		self.torches = None
+		self.lights = None
 		
 	def load (self):
 		
@@ -37,44 +37,28 @@ class maze_of_kindred ():
 		
 		self.maze.load()
 		
-		self.castle = pygame.image.load('assets/opengameart/liberated pixel cup/castle.png').convert_alpha()
+		self.castle_image = pygame.image.load('assets/opengameart/liberated pixel cup/castle.png').convert_alpha()
 		self.b_sound = pygame.image.load('assets/opengameart/nathanLovatoArt/sound.png').convert_alpha()
 		self.b_nosound = pygame.image.load('assets/opengameart/nathanLovatoArt/no_sound.png').convert_alpha()
 		self.b_restart = pygame.image.load('assets/opengameart/nathanLovatoArt/restart.png').convert_alpha()
-		
-		# button sound and restart click rect
-		self.b_rect = self.b_sound.get_rect(topleft=(common.GAME_WIDTH - 80, 10))
-		
-		# torches and flames (sprite animation)
+
 		torch = pygame.image.load('assets/opengameart/liberated pixel cup/torch.png').convert_alpha()
 		flame = pygame.image.load('assets/opengameart/liberated pixel cup/flames.png').convert_alpha()
+		light = pygame.image.load('assets/foundtimegames/dither_circle.png').convert_alpha()
 		
-		self.torch_images = []
+		# split images into frames
+		self.torch_frames = []
 		for i in range (0, 9):
-			self.torch_images.append(torch.subsurface(48 * i, 0, 48, 48))
-			
-		self.torches.append(animation(self.torch_images)) # torch 1
-		torch_images_copy = self.torch_images[:] # copy images
-		shuffle(torch_images_copy) 	# then shuffle
-		self.torches.append(animation(torch_images_copy)) # torch 2
+			self.torch_frames.append(torch.subsurface(48 * i, 0, 48, 48))
 		
-		self.flame_images = []
+		self.flame_frames = []
 		for i in range (0, 12):
-			self.flame_images.append(flame.subsurface(24 * i, 0, 24, 36))
-		self.torches.append(animation(self.flame_images))
+			self.flame_frames.append(flame.subsurface(24 * i, 0, 24, 36))
 		
-		self.torches_pos = [
-			(336, 80),
-			(480, 80),
-			(83, 138),
-		]
-		
-		# lights are the vision of the player
-		self.lights.append(light(0, 0))
-		self.lights.append(light(240, 0))
-		self.lights.append(light(384, 0))
-		self.lights.append(light(-13, 58))
-		
+		self.light_frames = []
+		for i in range (0, 5):
+			self.light_frames.append(light.subsurface(i * 224, 0, 224, 224))
+			
 		pygame.mixer.music.load('assets/opengameart/tozan/longbust.ogg')
 		
 	def create (self):
@@ -94,13 +78,30 @@ class maze_of_kindred ():
 		# black screen fade out
 		self.fade_timer = timer(2000)
 		
+		self.castle = sprite(0, -16, self.castle_image)
+		
+		self.torches = []
+		self.torches.append(sprite(336, 80, self.torch_frames[:]))
+		self.torches.append(sprite(480, 80, self.torch_frames[:]))
+		self.torches.append(sprite(83, 138, self.flame_frames[:]))
+		
+		self.lights = []
+		self.lights.append(sprite(0, 0, self.light_frames[:]))
+		self.lights.append(sprite(240, 0, self.light_frames[:]))
+		self.lights.append(sprite(384, 0, self.light_frames[:]))
+		self.lights.append(sprite(-13, 58, self.light_frames[:]))
+		
 		for t in self.torches:
-			t.play(common.TORCH_ANIMATION_TIME, loop=True)
+			t.play('default', loop=True)
+			shuffle(t.get_anim().frames)
 			
 		for l in self.lights:
-			l.anim.play(common.TORCH_ANIMATION_TIME, loop=True)
-			
-		self.fog = self.maze.surface.copy()
+			l.play('default', loop=True)
+			shuffle(l.get_anim().frames)
+		
+		self.sound = sprite(common.GAME_WIDTH - 80, 10, self.b_sound)
+		self.nosound = sprite(common.GAME_WIDTH - 80, 14, self.b_nosound)
+		self.restart = sprite(common.GAME_WIDTH - 70, 15, self.b_restart)
 		
 	def draw (self):
 		
@@ -122,14 +123,14 @@ class maze_of_kindred ():
 		player_x = self.player.x * common.TILE_SIZE - self.player.offset_x - 16
 		player_y = self.player.y * common.TILE_SIZE - self.player.offset_y - 32
 		
-		surface.blit(self.castle, (0, -16))
-		surface.blit(self.player.get_image(), (player_x, player_y))
+		surface.blit(self.castle.image, (self.castle.x, self.castle.y))
+		surface.blit(self.player.image, (player_x, player_y))
 		
-		for i in range (0, len(self.torches)): # torches sprite animations
-			surface.blit(self.torches[i].get_image(), self.torches_pos[i])
+		for t in self.torches:
+			surface.blit(t.image, (t.x, t.y))
 		
-		for l in self.lights: # the vision of the player
-			fog.blit(l.get_image(), (l.x, l.y))
+		for l in self.lights:
+			fog.blit(l.image, (l.x, l.y))
 
 		self.screen.blit(surface, (x, y))
 		
@@ -151,13 +152,13 @@ class maze_of_kindred ():
 			pygame.draw.rect(fog, (0, 0, 0, 170), (0, 0, common.GAME_WIDTH, common.GAME_HEIGHT))
 			self.screen.blit(fog, (0, 0))
 			
-			self.screen.blit(self.b_restart, (common.GAME_WIDTH - 70, 15))
+			self.screen.blit(self.restart.image, (self.restart.x, self.restart.y))
 
 		elif self.enable_sound:	
-			self.screen.blit(self.b_sound, (common.GAME_WIDTH - 80, 10))
+			self.screen.blit(self.sound.image, (self.sound.x, self.sound.y))
 			
 		else:
-			self.screen.blit(self.b_nosound, (common.GAME_WIDTH - 80, 14))
+			self.screen.blit(self.nosound.image, (self.nosound.x, self.nosound.y))
 		
 		pygame.display.update()
 		
@@ -183,7 +184,7 @@ class maze_of_kindred ():
 						
 					elif event.type == pygame.MOUSEBUTTONUP:
 						
-						if self.b_rect.collidepoint(event.pos):
+						if self.sound.rect.collidepoint(event.pos):
 							
 							if self.is_at_door(): # clicking on restart button
 								self.create()
@@ -225,7 +226,7 @@ class maze_of_kindred ():
 					t.update(time)
 					
 				for l in self.lights:
-					l.anim.update(time)
+					l.update(time)
 					
 				self.draw()
 				

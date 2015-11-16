@@ -1,6 +1,7 @@
 import pygame
 from animation import animation
 from random import shuffle
+import common
 
 class light ():
 
@@ -15,7 +16,7 @@ class light ():
 			self.frames.append(self.image.subsurface(i * 224, 0, 224, 224))
 		shuffle(self.frames)
 		
-		self.anim = animation(self.frames)
+		self.anim = animation(common.TORCH_ANIMATION_TIME, self.frames)
 		
 	def get_image (self):
 	

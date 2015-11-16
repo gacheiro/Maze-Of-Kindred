@@ -1,14 +1,22 @@
 import pygame
 from animation import animation
 from timer import timer
+from sprite import sprite
 import common
 
-WALK_MOVEMENT_TIME = 300
-
-class player ():
+class player (sprite):
 
 	def __init__ (self, x, y):
-	
+
+		# sprite
+		self.tileset = pygame.image.load('assets/opengameart/liberated pixel cup/princess.png')
+		self.images = []
+		for i in range (0, 4):
+			for j in range (0, 9):
+				self.images.append(self.tileset.subsurface(j * 64, i * 64, 64, 64))
+				
+		sprite.__init__(self, x, y, self.images)
+		
 		self.x = x
 		self.y = y
 		
@@ -26,18 +34,11 @@ class player ():
 		# default orientation
 		self.ori = 'up'
 		
-		# sprite
-		self.tileset = pygame.image.load('assets/opengameart/liberated pixel cup/princess.png')
-		self.images = []
-		for i in range (0, 4):
-			for j in range (0, 9):
-				self.images.append(self.tileset.subsurface(j * 64, i * 64, 64, 64))
-		
-		# animations
-		self.up = animation(self.images[0:9])
-		self.left = animation(self.images[10:18])
-		self.down = animation(self.images[18:27])		
-		self.right = animation(self.images[28:36])
+		# animations		
+		self.add_anim('walk_up', common.WALK_MOVEMENT_TIME, range(0, 9))
+		self.add_anim('walk_left', common.WALK_MOVEMENT_TIME, range(9, 18))
+		self.add_anim('walk_down', common.WALK_MOVEMENT_TIME, range(18, 27))
+		self.add_anim('walk_right', common.WALK_MOVEMENT_TIME, range(27, 36))
 	
 	def walk (self, x, y):
 		
@@ -60,22 +61,20 @@ class player ():
 			
 			if x < 0:
 				self.ori = 'left'
-				anim = self.left
 			elif x > 0:
 				self.ori = 'right'
-				anim = self.right
 			elif y > 0:
 				self.ori = 'down'
-				anim = self.down
 			else:
 				self.ori = 'up'
-				anim = self.up
-			
-			anim.play(WALK_MOVEMENT_TIME)
-			self.timer = timer(WALK_MOVEMENT_TIME)
+
+			self.play('walk_' + self.ori)
+			self.timer = timer(common.WALK_MOVEMENT_TIME)
 			
 	def update (self, time):
-			
+		
+		sprite.update(self, time)
+		
 		if self.timer is not None and not self.timer.is_complete():
 			self.timer.update(time)
 			self.offset_x = self.__offset_x - float(self.timer.time_passed)/self.timer.time * self.__x * common.TILE_SIZE
@@ -96,25 +95,3 @@ class player ():
 			self.offset_x = 0
 			self.offset_y = 0
 			
-		anim = self.get_anim()
-		anim.update(time)
-		
-	def get_anim (self):
-	
-		_r = None
-		
-		if self.ori == 'up':
-			_r = self.up
-		elif self.ori == 'left':
-			_r = self.left
-		elif self.ori == 'right':
-			_r = self.right
-		else:
-			_r = self.down
-			
-		return _r	
-	
-	def get_image (self):
-	
-		return self.get_anim().get_image()
-		

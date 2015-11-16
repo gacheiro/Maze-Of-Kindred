@@ -1,30 +1,28 @@
 class animation ():
 
-	def __init__ (self, images):
+	def __init__ (self, duration, frames):
 		
-		assert(len(images) > 0)
+		if not isinstance(frames, (list, tuple)):
+			frames = [frames]
 		
-		self.images = images
-		self.len = len(images)
+		self.frames = frames
+		self.len = len(frames)
 		self.state = 0
-		self.time_total = 0
+		self.duration = duration
 		self.time_passed = 0
 		
 		self.playing = False
 		self.loop = False
 		
-		self.frame_time = 1 # to avoid 0/0	
+		self.frame_time = self.duration / self.len
 		
-	def play (self, time_total, loop=False):
+	def play (self, loop=False):
 	
-		self.time_total = time_total
 		self.time_passed = 0
 		self.state = 0
 		
 		self.playing = True
 		self.loop = loop
-		
-		self.frame_time = time_total / self.len
 	
 	def update (self, time_passed):
 	
@@ -39,7 +37,7 @@ class animation ():
 		
 	def get_image (self):
 	
-		return self.images[self.state]
+		return self.frames[self.state]
 		
 	def is_complete (self):
 
