@@ -1,6 +1,7 @@
 from random import randint
 import common
 import pygame
+from loader import loader
 
 # this code is a adaptation of Emanuele Feronato's maze generator
 # checkout http://www.emanueleferonato.com/2015/06/30/pure-javascript-perfect-tile-maze-generation-with-a-bit-of-magic-thanks-to-phaser/
@@ -17,28 +18,23 @@ class maze ():
 		self.height = height
 		self.tile_size = tile_size
 	
-	def load (self):
-	
-		self.cement_tileset = pygame.image.load('assets/opengameart/liberated pixel cup/cement.png').convert()		
-		self.floor = pygame.image.load('assets/opengameart/liberated pixel cup/castlefloors_outside.png').convert()
+		self.image = pygame.Surface((self.width * self.tile_size, self.height * self.tile_size), pygame.SRCALPHA)
 		
-		self.cement_images = [
-			self.cement_tileset.subsurface(32, 128, 32, 32),
-			self.cement_tileset.subsurface(32, 96, 32, 32),
-			self.cement_tileset.subsurface(0, 160, 32, 32),
-			self.cement_tileset.subsurface(32, 160, 32, 32),
-			self.floor.subsurface(32, 0, 32, 32),
-			self.floor.subsurface(64, 128, 32, 32),
-			self.floor.subsurface(0, 32, 32, 32),
-		]
-		
-		self.surface = pygame.Surface((self.width * self.tile_size, self.height * self.tile_size), pygame.SRCALPHA)
-	
 	def create (self):
 		
-		wall_base_image_id = 0
-		wall_image_id = 1
-		floor_image_id = 6
+		cement = loader.get('maze_cement') # cement tiles
+		floor = loader.get('maze_floor')   # floor tiles
+		CEMENT_BASE_WALL = 0
+		CEMENT_TOP_WALL = 1
+		
+		self.tiles = [
+			cement[13], # CEMENT_BASE_WALL
+			cement[10], # CEMMENT_TOP_WALL
+			floor[13],  # FLOOR
+			floor[14],
+			floor[17],
+			floor[18],
+		]
 		
 		self.matrix = []
 		self.graphics = []
@@ -48,7 +44,7 @@ class maze ():
 			self.graphics.append([])
 			for j in range (0, self.width):
 				self.matrix[i].append(1)
-				self.graphics[i].append(floor_image_id)
+				self.graphics[i].append(randint(2, 4))
 			
 		posX = self.height - 3
 		posY = self.width/2
@@ -124,9 +120,9 @@ class maze ():
 			
 				if self.matrix[i][j] == 1:
 					if self.matrix[i+1][j] == 1:
-						self.graphics[i][j] = wall_image_id
+						self.graphics[i][j] = CEMENT_TOP_WALL
 					else:
-						self.graphics[i][j] = wall_base_image_id
+						self.graphics[i][j] = CEMENT_BASE_WALL
 						
 		# last line border
 		for j in range (0, self.width):
@@ -139,44 +135,36 @@ class maze ():
 		self.matrix[6][0] = 0
 		self.matrix[6][-1] = 0
 		self.matrix[6][13] = 0
+		
+		self.__draw()
+		loader.set(self.image, 'maze')
+		
 		self.matrix[7][2] = 1
 		self.matrix[7][3] = 1
 		
-		# graphics are static so just draw once onto the surface
-		self.draw(self.surface)
+	def __draw (self):
 		
-	def draw (self, surface):
-		
-	#	if common.ENABLE_GRAPHICS:
-			
-			for i in range (0, self.height):
-				for j in range (0, self.width):				
+		for i in range (0, self.height):
+			for j in range (0, self.width):				
+				
+				id = self.graphics[i][j]
+				
+				if self.matrix[i][j] == 1: # if is wall then
+				
+					# draws borders over the walls for better appearance
+					self.image.blit(self.tiles[id], (j * self.tile_size, i * self.tile_size))
 					
-					id = self.graphics[i][j]
+					border_color = (58, 49, 48)						
 					
-					if id == 0 or id == 1:
-						surface.blit(self.cement_images[id], (j * self.tile_size, i * self.tile_size))
-						
-						# draws borders over the for better appearance
-						
-						border_color = (58, 49, 48)						
-						
-						if j + 1 < self.width and self.matrix[i][j+1] == 0:
-							pygame.draw.line(surface, border_color, (j * self.tile_size + 31, i * self.tile_size), (j * self.tile_size + 31, i * self.tile_size + 32), 1)
-						
-						if j - 1 >= 0 and self.matrix[i][j-1] == 0:
-							pygame.draw.line(surface, border_color, (j * self.tile_size, i * self.tile_size), (j * self.tile_size, i * self.tile_size + 31), 1)
-						
-						if i - 1 >= 0 and self.matrix[i-1][j] == 0:
-							pygame.draw.line(surface, border_color, (j * self.tile_size, i * self.tile_size), (j * self.tile_size + 31, i * self.tile_size), 1)
-						
-					else:
-						surface.blit(self.cement_images[id], (j * self.tile_size, i * self.tile_size))
+					if j + 1 < self.width and self.matrix[i][j+1] == 0:
+						pygame.draw.line(self.image, border_color, (j * self.tile_size + 31, i * self.tile_size), (j * self.tile_size + 31, i * self.tile_size + 32), 1)
 					
-	#	else:
-	#		
-	#		for i in range (0, self.height):
-	#			for j in range (0, self.width):
-	#				if self.matrix[i][j] == 0:
-	#					rect = pygame.Rect(j * self.tile_size, i * self.tile_size, self.tile_size, self.tile_size)
-	#					pygame.draw.rect(surface, (255, 255, 255), rect)
+					if j - 1 >= 0 and self.matrix[i][j-1] == 0:
+						pygame.draw.line(self.image, border_color, (j * self.tile_size, i * self.tile_size), (j * self.tile_size, i * self.tile_size + 31), 1)
+					
+					if i - 1 >= 0 and self.matrix[i-1][j] == 0:
+						pygame.draw.line(self.image, border_color, (j * self.tile_size, i * self.tile_size), (j * self.tile_size + 31, i * self.tile_size), 1)
+					
+				else:
+					self.image.blit(self.tiles[id], (j * self.tile_size, i * self.tile_size))
+					

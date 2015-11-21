@@ -1,19 +1,21 @@
 import pygame
 from animation import animation
+from loader import loader
 
 class sprite (pygame.sprite.Sprite):
 
-	def __init__ (self, x, y, frames):
+	def __init__ (self, x, y, key):
 	
 		pygame.sprite.Sprite.__init__(self)
 		
 		self.x = x
 		self.y = y
 		
-		self.frames = frames
+		self.key = key
+		self.frames = loader.get(key)
 		self.anims = {}
 		self.current_anim = 'default'
-		self.anims['default'] = animation(1000, frames)
+		self.anims['default'] = animation(1000, self.frames)
 		self.image = self.anims[self.current_anim].get_image()	
 		
 		self.rect = self.image.get_rect() 

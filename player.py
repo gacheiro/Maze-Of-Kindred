@@ -2,23 +2,19 @@ import pygame
 from animation import animation
 from timer import timer
 from sprite import sprite
+from loader import loader
 import common
 
 class player (sprite):
 
 	def __init__ (self, x, y):
-
-		# sprite
-		self.tileset = pygame.image.load('assets/opengameart/liberated pixel cup/princess.png')
-		self.images = []
-		for i in range (0, 4):
-			for j in range (0, 9):
-				self.images.append(self.tileset.subsurface(j * 64, i * 64, 64, 64))
-				
-		sprite.__init__(self, x, y, self.images)
+		
+		sprite.__init__(self, x, y, 'princess')
 		
 		self.x = x
 		self.y = y
+		self.light = sprite(x, y, 'light')
+		self.light.play('default', loop=True)
 		
 		# walk timer
 		self.timer = None
@@ -73,7 +69,8 @@ class player (sprite):
 			
 	def update (self, time):
 		
-		sprite.update(self, time)
+		sprite.update(self, time)		
+		self.light.update(time)
 		
 		if self.timer is not None and not self.timer.is_complete():
 			self.timer.update(time)
@@ -94,4 +91,8 @@ class player (sprite):
 		else:
 			self.offset_x = 0
 			self.offset_y = 0
+		
+		# adjust player light position
+		self.light.x = self.x * common.TILE_SIZE - self.offset_x - 112 + 16
+		self.light.y = self.y * common.TILE_SIZE - self.offset_y - 112 + 16
 			
