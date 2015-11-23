@@ -89,11 +89,13 @@ class maze_of_kindred ():
 		self.nosound = sprite(common.GAME_WIDTH - 80, 14, 'nosound')
 		self.restart = sprite(common.GAME_WIDTH - 70, 15, 'restart')
 		
+		self.fog = pygame.Surface((self.maze.image.get_width(), self.maze.image.get_height()))
+		self.fog.set_colorkey((255, 0, 255))
+		
 	def draw (self):
 		
 		surface = self.maze.image.copy()
-		fog = pygame.Surface((surface.get_width(), surface.get_height()))
-		fog.set_colorkey((255, 0, 255))
+		self.fog.fill((0, 0, 0))
 		
 		x = common.GAME_WIDTH * 0.5 - self.player.x * self.tile_size - 16 + self.player.offset_x
 		y = common.GAME_HEIGHT * 0.8 - self.player.y * self.tile_size + self.player.offset_y
@@ -116,15 +118,15 @@ class maze_of_kindred ():
 			surface.blit(t.image, (t.x, t.y))
 		
 		for l in self.lights:
-			fog.blit(l.image, (l.x, l.y))
+			self.fog.blit(l.image, (l.x, l.y))
 		
 		player_light = self.player.light
-		fog.blit(player_light.image, (player_light.x, player_light.y))
+		self.fog.blit(player_light.image, (player_light.x, player_light.y))
 
 		self.screen.blit(surface, (x, y))
 		
 		if common.ENABLE_FOG:
-			self.screen.blit(fog, (x, y))
+			self.screen.blit(self.fog, (x, y))
 		
 		if not self.fade_timer.is_complete():
 		
@@ -203,8 +205,8 @@ class maze_of_kindred ():
 					elif event.type == pygame.KEYUP or self.is_at_door():
 						x = y = 0
 				
-				if self.maze.matrix[self.player.y + y][self.player.x + x] == 0:
-					self.player.walk(x, y)	
+					if self.maze.matrix[self.player.y + y][self.player.x + x] == 0:
+						self.player.walk(x, y)	
 					
 				self.player.update(time)
 				
@@ -217,7 +219,7 @@ class maze_of_kindred ():
 				self.draw()
 				
 			#	print self.player.x, self.player.y
-			#	print clock.get_fps()
+				print clock.get_fps()
 		
 	def is_at_door (self):
 		

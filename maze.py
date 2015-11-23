@@ -18,7 +18,7 @@ class maze ():
 		self.height = height
 		self.tile_size = tile_size
 	
-		self.image = pygame.Surface((self.width * self.tile_size, self.height * self.tile_size), pygame.SRCALPHA)
+		self.image = pygame.Surface((self.width * self.tile_size, self.height * self.tile_size))
 		
 	def create (self):
 		
