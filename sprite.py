@@ -1,8 +1,8 @@
 import pygame
-from animation import animation
-from loader import loader
+from animation import Animation
+from loader import Loader
 
-class sprite (pygame.sprite.Sprite):
+class Sprite (pygame.sprite.Sprite):
 
 	def __init__ (self, x, y, key):
 	
@@ -12,10 +12,10 @@ class sprite (pygame.sprite.Sprite):
 		self.y = y
 		
 		self.key = key
-		self.frames = loader.get(key)
+		self.frames = Loader.get(key)
 		self.anims = {}
 		self.current_anim = 'default'
-		self.anims['default'] = animation(1000, self.frames)
+		self.anims['default'] = Animation(1000, self.frames)
 		self.image = self.anims[self.current_anim].get_image()	
 		
 		self.rect = self.image.get_rect() 
@@ -28,7 +28,7 @@ class sprite (pygame.sprite.Sprite):
 		for f in frames:
 			__frames.append(self.frames[f])
 		
-		a = animation(duration, __frames)
+		a = Animation(duration, __frames)
 		self.anims[name] = a
 		
 		return a

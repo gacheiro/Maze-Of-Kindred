@@ -1,4 +1,4 @@
-class timer ():
+class Timer ():
 
 	def __init__ (self, time):
 	

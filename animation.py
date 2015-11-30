@@ -1,4 +1,4 @@
-class animation ():
+class Animation ():
 
 	def __init__ (self, duration, frames):
 		

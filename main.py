@@ -1,14 +1,14 @@
 import pygame
-from maze import maze
-from player import player
-from timer import timer
+from maze import Maze
+from player import Player
+from timer import Timer
 from random import shuffle
 from random import randint
-from sprite import sprite
-from loader import loader
+from sprite import Sprite
+from loader import Loader
 import common
 
-class maze_of_kindred ():
+class MazeOfKindred ():
 
 	def __init__ (self, width, height, tile_size):
 		
@@ -35,27 +35,27 @@ class maze_of_kindred ():
 		self.screen = pygame.display.set_mode((common.GAME_WIDTH, common.GAME_HEIGHT))
 		self.screen.convert_alpha()
 		
-		loader.image('assets/opengameart/liberated pixel cup/castle.png', 'castle')
-		loader.image('assets/opengameart/nathanLovatoArt/sound.png', 'sound')
-		loader.image('assets/opengameart/nathanLovatoArt/no_sound.png', 'nosound')
-		loader.image('assets/opengameart/nathanLovatoArt/restart.png', 'restart')
+		Loader.image('assets/opengameart/liberated pixel cup/castle.png', 'castle')
+		Loader.image('assets/opengameart/nathanLovatoArt/sound.png', 'sound')
+		Loader.image('assets/opengameart/nathanLovatoArt/no_sound.png', 'nosound')
+		Loader.image('assets/opengameart/nathanLovatoArt/restart.png', 'restart')
 		
-		loader.tileset('assets/opengameart/liberated pixel cup/princess.png', 'princess', 4, 9, 64, 64)
-		loader.tileset('assets/opengameart/liberated pixel cup/torch.png', 'torch', 1, 9, 48, 48)
-		loader.tileset('assets/opengameart/liberated pixel cup/flame.png', 'flame', 1, 12, 24, 36)
-		loader.tileset('assets/foundtimegames/dither_circle.png', 'light', 1, 5, 224, 224)
-		loader.tileset('assets/opengameart/liberated pixel cup/cement.png', 'maze_cement', 6, 3, 32, 32)
-		loader.tileset('assets/opengameart/liberated pixel cup/castlefloors_outside.png', 'maze_floor', 5, 4, 32, 32)
+		Loader.tileset('assets/opengameart/liberated pixel cup/princess.png', 'princess', 4, 9, 64, 64)
+		Loader.tileset('assets/opengameart/liberated pixel cup/torch.png', 'torch', 1, 9, 48, 48)
+		Loader.tileset('assets/opengameart/liberated pixel cup/flame.png', 'flame', 1, 12, 24, 36)
+		Loader.tileset('assets/foundtimegames/dither_circle.png', 'light', 1, 5, 224, 224)
+		Loader.tileset('assets/opengameart/liberated pixel cup/cement.png', 'maze_cement', 6, 3, 32, 32)
+		Loader.tileset('assets/opengameart/liberated pixel cup/castlefloors_outside.png', 'maze_floor', 5, 4, 32, 32)
 		
-		loader.audio('assets/opengameart/tozan/longbust.ogg', 'music')
+		Loader.audio('assets/opengameart/tozan/longbust.ogg', 'music')
 		
 	def create (self):
 		
-		self.player = player(self.width/2,  self.height - 2)
-		self.maze = maze(self.width, self.height, self.tile_size)
+		self.player = Player(self.width/2,  self.height - 2)
+		self.maze = Maze(self.width, self.height, self.tile_size)
 		self.maze.create()
 		
-		self.music = loader.get('music')
+		self.music = Loader.get('music')
 		self.music.play(-1)
 		
 		if self.enable_sound:
@@ -65,19 +65,19 @@ class maze_of_kindred ():
 			self.music.set_volume(0)
 
 		# black screen fade out
-		self.fade_timer = timer(2000)
+		self.fade_timer = Timer(2000)
 		
-		self.castle = sprite(0, -16, 'castle')
+		self.castle = Sprite(0, -16, 'castle')
 		
 		self.torches = []
-		self.torches.append(sprite(336, 80, 'torch'))
-		self.torches.append(sprite(480, 80, 'torch'))
-		self.torches.append(sprite(83, 140, 'flame'))
+		self.torches.append(Sprite(336, 80, 'torch'))
+		self.torches.append(Sprite(480, 80, 'torch'))
+		self.torches.append(Sprite(83, 140, 'flame'))
 		
 		self.lights = []
-		self.lights.append(sprite(240, 0, 'light'))
-		self.lights.append(sprite(384, 0, 'light'))
-		self.lights.append(sprite(-13, 58, 'light'))
+		self.lights.append(Sprite(240, 0, 'light'))
+		self.lights.append(Sprite(384, 0, 'light'))
+		self.lights.append(Sprite(-13, 58, 'light'))
 		
 		for t in self.torches:
 			t.play('default', loop=True)
@@ -85,9 +85,9 @@ class maze_of_kindred ():
 		for l in self.lights:
 			l.play('default', loop=True)
 		
-		self.sound = sprite(common.GAME_WIDTH - 80, 10, 'sound')
-		self.nosound = sprite(common.GAME_WIDTH - 80, 14, 'nosound')
-		self.restart = sprite(common.GAME_WIDTH - 70, 15, 'restart')
+		self.sound = Sprite(common.GAME_WIDTH - 80, 10, 'sound')
+		self.nosound = Sprite(common.GAME_WIDTH - 80, 14, 'nosound')
+		self.restart = Sprite(common.GAME_WIDTH - 70, 15, 'restart')
 		
 		self.fog = pygame.Surface((self.maze.image.get_width(), self.maze.image.get_height()))
 		self.fog.set_colorkey((255, 0, 255))
@@ -219,7 +219,7 @@ class maze_of_kindred ():
 				self.draw()
 				
 			#	print self.player.x, self.player.y
-				print clock.get_fps()
+			#	print clock.get_fps()
 		
 	def is_at_door (self):
 		
@@ -230,7 +230,7 @@ if __name__ == '__main__':
 	pygame.init()
 	pygame.mixer.init()
 	
-	m = maze_of_kindred(common.MAZE_WIDTH, common.MAZE_HEIGHT, common.TILE_SIZE)
+	m = MazeOfKindred(common.MAZE_WIDTH, common.MAZE_HEIGHT, common.TILE_SIZE)
 	m.load()
 	m.create()
 	m.main()

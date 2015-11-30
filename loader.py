@@ -1,6 +1,6 @@
 import pygame
 
-class loader ():
+class Loader ():
 
 	cache = {}
 	

@@ -1,19 +1,18 @@
 import pygame
-from animation import animation
-from timer import timer
-from sprite import sprite
-from loader import loader
+from timer import Timer
+from sprite import Sprite
+from loader import Loader
 import common
 
-class player (sprite):
+class Player (Sprite):
 
 	def __init__ (self, x, y):
 		
-		sprite.__init__(self, x, y, 'princess')
+		Sprite.__init__(self, x, y, 'princess')
 		
 		self.x = x
 		self.y = y
-		self.light = sprite(x, y, 'light')
+		self.light = Sprite(x, y, 'light')
 		self.light.play('default', loop=True)
 		
 		# walk timer
@@ -65,11 +64,11 @@ class player (sprite):
 				self.ori = 'up'
 
 			self.play('walk_' + self.ori)
-			self.timer = timer(common.WALK_MOVEMENT_TIME)
+			self.timer = Timer(common.WALK_MOVEMENT_TIME)
 			
 	def update (self, time):
 		
-		sprite.update(self, time)		
+		Sprite.update(self, time)		
 		self.light.update(time)
 		
 		if self.timer is not None and not self.timer.is_complete():

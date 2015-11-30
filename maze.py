@@ -1,13 +1,13 @@
 from random import randint
 import common
 import pygame
-from loader import loader
+from loader import Loader
 
 # this code is a adaptation of Emanuele Feronato's maze generator
 # checkout http://www.emanueleferonato.com/2015/06/30/pure-javascript-perfect-tile-maze-generation-with-a-bit-of-magic-thanks-to-phaser/
 # for original code
 
-class maze ():
+class Maze ():
 
 	def __init__ (self, width, height, tile_size):
 	
@@ -22,8 +22,8 @@ class maze ():
 		
 	def create (self):
 		
-		cement = loader.get('maze_cement') # cement tiles
-		floor = loader.get('maze_floor')   # floor tiles
+		cement = Loader.get('maze_cement') # cement tiles
+		floor = Loader.get('maze_floor')   # floor tiles
 		CEMENT_BASE_WALL = 0
 		CEMENT_TOP_WALL = 1
 		
@@ -137,7 +137,7 @@ class maze ():
 		self.matrix[6][13] = 0
 		
 		self.__draw()
-		loader.set(self.image, 'maze')
+		Loader.set(self.image, 'maze')
 		
 		self.matrix[7][2] = 1
 		self.matrix[7][3] = 1
