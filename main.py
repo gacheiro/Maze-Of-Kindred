@@ -51,7 +51,10 @@ class MazeOfKindred ():
 		
 	def create (self):
 		
-		self.player = Player(self.width/2,  self.height - 2)
+		self.player = Player(self.width/2, self.height - 2)
+		self.player.offset_x = - 16
+		self.player.offset_y = - 32
+		
 		self.maze = Maze(self.width, self.height, self.tile_size)
 		self.maze.create()
 		
@@ -97,8 +100,8 @@ class MazeOfKindred ():
 		surface = self.maze.image.copy()
 		self.fog.fill((0, 0, 0))
 		
-		x = common.GAME_WIDTH * 0.5 - self.player.x * self.tile_size - 16 + self.player.offset_x
-		y = common.GAME_HEIGHT * 0.8 - self.player.y * self.tile_size + self.player.offset_y
+		x = common.GAME_WIDTH * 0.5 - self.player.x
+		y = common.GAME_HEIGHT * 0.8 - self.player.y
 
 		# normalize x and y
 		if x > 0: x = 0
@@ -107,21 +110,17 @@ class MazeOfKindred ():
 		if y > 0: y = 0
 		elif y < -960: y = -960
 		
-		# player visual x and y
-		player_x = self.player.x * common.TILE_SIZE - self.player.offset_x - 16
-		player_y = self.player.y * common.TILE_SIZE - self.player.offset_y - 32
-		
-		surface.blit(self.castle.image, (self.castle.x, self.castle.y))
-		surface.blit(self.player.image, (player_x, player_y))
+		surface.blit(self.castle.image, (self.castle.vx, self.castle.vy))
+		surface.blit(self.player.image, (self.player.vx, self.player.vy))
 		
 		for t in self.torches:
-			surface.blit(t.image, (t.x, t.y))
+			surface.blit(t.image, (t.vx, t.vy))
 		
 		for l in self.lights:
-			self.fog.blit(l.image, (l.x, l.y))
+			self.fog.blit(l.image, (l.vx, l.vy))
 		
 		player_light = self.player.light
-		self.fog.blit(player_light.image, (player_light.x, player_light.y))
+		self.fog.blit(player_light.image, (player_light.vx, player_light.vy))
 
 		self.screen.blit(surface, (x, y))
 		
@@ -130,7 +129,7 @@ class MazeOfKindred ():
 		
 		if not self.fade_timer.is_complete():
 		
-			alpha = 255 - float(self.fade_timer.time_passed) / self.fade_timer.time * 255 
+			alpha = 255 - self.fade_timer.percent_done * 255 
 			alpha = int(alpha)
 			
 			fog = pygame.Surface((common.GAME_WIDTH, common.GAME_HEIGHT), pygame.SRCALPHA)
@@ -143,13 +142,13 @@ class MazeOfKindred ():
 			pygame.draw.rect(fog, (0, 0, 0, 170), (0, 0, common.GAME_WIDTH, common.GAME_HEIGHT))
 			self.screen.blit(fog, (0, 0))
 			
-			self.screen.blit(self.restart.image, (self.restart.x, self.restart.y))
+			self.screen.blit(self.restart.image, (self.restart.vx, self.restart.vy))
 
 		elif self.enable_sound:	
-			self.screen.blit(self.sound.image, (self.sound.x, self.sound.y))
+			self.screen.blit(self.sound.image, (self.sound.vx, self.sound.vy))
 			
 		else:
-			self.screen.blit(self.nosound.image, (self.nosound.x, self.nosound.y))
+			self.screen.blit(self.nosound.image, (self.nosound.vx, self.nosound.vy))
 		
 		pygame.display.update()
 		
@@ -205,7 +204,7 @@ class MazeOfKindred ():
 					elif event.type == pygame.KEYUP or self.is_at_door():
 						x = y = 0
 				
-					if self.maze.matrix[self.player.y + y][self.player.x + x] == 0:
+					if self.maze.matrix[self.player.grid_y + y][self.player.grid_x + x] == 0:
 						self.player.walk(x, y)	
 					
 				self.player.update(time)
@@ -219,11 +218,12 @@ class MazeOfKindred ():
 				self.draw()
 				
 			#	print self.player.x, self.player.y
+			#	print self.player.grid_x, self.player.grid_y
 			#	print clock.get_fps()
 		
 	def is_at_door (self):
 		
-		return self.player.x == 13 and self.player.y == 6
+		return self.player.grid_x == 13 and self.player.grid_y == 6
 
 if __name__ == '__main__':
 	

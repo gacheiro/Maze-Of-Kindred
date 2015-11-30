@@ -10,22 +10,17 @@ class Player (Sprite):
 		
 		Sprite.__init__(self, x, y, 'princess')
 		
-		self.x = x
-		self.y = y
+		self.grid_x = x
+		self.grid_y = y
+
 		self.light = Sprite(x, y, 'light')
+		self.light.offset_x = -96
+		self.light.offset_y = -106
 		self.light.play('default', loop=True)
 		
 		# walk timer
 		self.timer = None
 		
-		# smooth walk utils
-		self.__x = 0
-		self.__y = 0
-		self.offset_x = 0
-		self.offset_y = 0
-		self.__offset_x = 0
-		self.__offset_y = 0
-			
 		# default orientation
 		self.ori = 'up'
 		
@@ -34,6 +29,22 @@ class Player (Sprite):
 		self.add_anim('walk_left', common.WALK_MOVEMENT_TIME, range(9, 18))
 		self.add_anim('walk_down', common.WALK_MOVEMENT_TIME, range(18, 27))
 		self.add_anim('walk_right', common.WALK_MOVEMENT_TIME, range(27, 36))
+	
+	@property
+	def grid_x (self):		
+		return int(self.x / common.TILE_SIZE)
+		
+	@property
+	def grid_y (self):		
+		return int(self.y / common.TILE_SIZE)
+	
+	@grid_x.setter
+	def grid_x (self, x):		
+		self.x = x * common.TILE_SIZE
+		
+	@grid_y.setter
+	def grid_y (self, y):		
+		self.y = y * common.TILE_SIZE
 	
 	def walk (self, x, y):
 		
@@ -45,14 +56,17 @@ class Player (Sprite):
 		
 		elif self.timer is None or self.timer.is_complete():
 		
-			self.x += x
-			self.y += y
+			x *= common.TILE_SIZE
+			y *= common.TILE_SIZE
 			
-			self.__x = x
-			self.__y = y
+			self._prev_x = self.x
+			self._prev_y = self.y
 			
-			self.__offset_x = common.TILE_SIZE * x
-			self.__offset_y = common.TILE_SIZE * y
+			self._next_x = self.x + x
+			self._next_y = self.y + y
+			
+			self._move_x = x
+			self._move_y = y
 			
 			if x < 0:
 				self.ori = 'left'
@@ -65,33 +79,20 @@ class Player (Sprite):
 
 			self.play('walk_' + self.ori)
 			self.timer = Timer(common.WALK_MOVEMENT_TIME)
-			
+	
 	def update (self, time):
 		
 		Sprite.update(self, time)		
 		self.light.update(time)
 		
 		if self.timer is not None and not self.timer.is_complete():
+
 			self.timer.update(time)
-			self.offset_x = self.__offset_x - float(self.timer.time_passed)/self.timer.time * self.__x * common.TILE_SIZE
-			self.offset_y = self.__offset_y - float(self.timer.time_passed)/self.timer.time * self.__y * common.TILE_SIZE
 			
-			# normalize offset_x and offset_y
-			if self.__x > 0 and self.offset_x < 0:
-				self.offset_x = 0
-			elif self.__x < 0 and self.offset_x > 0:
-				self.offset_x = 0
-			
-			if self.__y > 0 and self.offset_y < 0:
-				self.offset_y = 0
-			elif self.__y < 0 and self.offset_y > 0:
-				self.offset_y = 0
-				
-		else:
-			self.offset_x = 0
-			self.offset_y = 0
-		
+			self.x = self._prev_x + self.timer.percent_done * self._move_x
+			self.y = self._prev_y + self.timer.percent_done * self._move_y
+
 		# adjust player light position
-		self.light.x = self.x * common.TILE_SIZE - self.offset_x - 112 + 16
-		self.light.y = self.y * common.TILE_SIZE - self.offset_y - 112 + 16
-			
+		self.light.x = self.x
+		self.light.y = self.y
+		

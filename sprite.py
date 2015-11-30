@@ -11,6 +11,9 @@ class Sprite (pygame.sprite.Sprite):
 		self.x = x
 		self.y = y
 		
+		self.offset_x = 0
+		self.offset_y = 0
+		
 		self.key = key
 		self.frames = Loader.get(key)
 		self.anims = {}
@@ -22,6 +25,14 @@ class Sprite (pygame.sprite.Sprite):
 		self.rect.x = x
 		self.rect.y = y
 
+	@property
+	def vx (self):
+		return self.x + self.offset_x
+	
+	@property
+	def vy (self):
+		return self.y + self.offset_y
+		
 	def add_anim (self, name, duration, frames):
 		
 		__frames = []
