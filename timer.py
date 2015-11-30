@@ -17,3 +17,14 @@ class Timer ():
 	
 		return self.time_passed >= self.time
 
+	@property
+	def percent_done (self):
+	
+		p = float(self.time_passed)/self.time
+		
+		if p > 1:
+			return 1
+		
+		else:
+			return p
+			
